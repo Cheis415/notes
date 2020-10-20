@@ -22,32 +22,35 @@ class User(db.Model):
                    primary_key=True,
                    autoincrement=True)
 
-    username = db.Column(db.Text(20),
+    username = db.Column(db.String(20),
                          nullable=False,
                          unique=True)
 
     password = db.Column(db.Text,
                          nullable=False)
 
-    email = db.Column(db.Text(50),
-                         nullable=False
-                         unique=True)
+    email = db.Column(db.String(50),
+                      nullable=False,
+                      unique=True)
 
-    first_name = db.Column(db.Text(30),
-                         nullable=False)
+    first_name = db.Column(db.String(30),
+                           nullable=False)
 
-    last_name = db.Column(db.Text(30),
-                         nullable=False)
+    last_name = db.Column(db.String(30),
+                          nullable=False)
+
+    notes = db.relationship("Note")
 
     # start_register
     @classmethod
-    def register(cls, username, pwd):
+    def register(cls, username, pwd, email, first_name, last_name):
         """Register user w/hashed password & return user."""
 
         hashed = bcrypt.generate_password_hash(pwd).decode('utf8')
 
         # return instance of user w/username and hashed pwd
-        return cls(username=username, password=hashed)
+        return cls(username=username, password=hashed, email=email,
+                   first_name=first_name, last_name=last_name)
 
     # end_register
 
@@ -66,4 +69,26 @@ class User(db.Model):
             return u
         else:
             return False
-    # end_authenticate
+
+
+class Note(db.Model):
+    """user note"""
+
+    __tablename__ = "notes"
+
+    id = db.Column(db.Integer,
+                   primary_key=True,
+                   autoincrement=True)
+
+    title = db.Column(db.String(100),
+                      nullable=False)
+
+    content = db.Column(db.Text,
+                        nullable=False)
+
+    owner = db.Column(db.Integer,
+                      db.ForeignKey("users.id"))
+
+    user = db.relationship("User")
+
+

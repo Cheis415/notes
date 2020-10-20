@@ -1,4 +1,4 @@
-om flask import Flask, render_template, redirect, session, flash
+from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 from models import connect_db, db, User
 from forms import RegisterForm, LoginForm
@@ -19,7 +19,7 @@ toolbar = DebugToolbarExtension(app)
 def homepage():
     """Show homepage with links to site areas."""
 
-    return redirect("/register")
+    return render_template("index.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -32,17 +32,17 @@ def register():
         name = form.username.data
         pwd = form.password.data
         email = form.email.data
-        first_name = form.first_name.data
-        last_name = form.last_name.data
+        fn = form.first_name.data
+        ln = form.last_name.data
 
-        user = User.register(name, pwd, email, first_name, last_name)
+        user = User.register(name, pwd, email, fn, ln)
         db.session.add(user)
         db.session.commit()
 
         session["user_id"] = user.id
 
         # on successful login, redirect to secret page
-        return redirect("/secret")
+        return redirect("/user/user_id")
 
     else:
         return render_template("register.html", form=form)
@@ -63,30 +63,25 @@ def login():
 
         if user:
             session["user_id"] = user.id  # keep logged in
-            return redirect("/secret")
+            return redirect("/user/user_id")
 
         else:
-            form.username.errors = ["Bad name/password"]
+            form.username.errors = ["Don't mess with the Zohan."]
 
     return render_template("login.html", form=form)
 
 
-@app.route("/secret")
-def secret():
+@app.route("/user/<int:user_id>")
+def secret(user_id):
     """Example hidden page for logged-in users only."""
 
     if "user_id" not in session:
         flash("You are not permitted here idiot!")
         return redirect("/")
 
-        # alternatively, can return HTTP Unauthorized status:
-        #
-        # from werkzeug.exceptions import Unauthorized
-        # raise Unauthorized()
-
     else:
         flash("You made it!  Ezpzlemonsqzy.")
-        return render_template("secret.html")
+        return render_template("user.html")
 
 
 @app.route("/logout")

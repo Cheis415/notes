@@ -9,15 +9,15 @@
     <div class="navbar-brand"><a class="text-white" href="/">Naughty Notes</a></div>
   </div>
 </div>
-{% block title %}
+{% block title %} {% endblock%}
 <div class="container" style="margin-top: 2em">
   {% for msg in get_flashed_messages() %}
     <div class="alert alert-danger">{{ msg }}</div>
   {% endfor %}
 
   {% block content %}
-  {% endblock %}
 </div>
 
+{% endblock %}
 </body>
 </html>
