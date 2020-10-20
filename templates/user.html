@@ -2,10 +2,19 @@
 
 {% block content %}
 
-  <h1 class="display-4">Welcome to the Chamber of Secrets!</h1>
+  <h1 class="display-4">Welcome to the your page, {{user.first_name}}!</h1>
+  <ul>User Notes:
+  {% for note in user.notes %}
+  <li>{{note.title}}
+    <p>
+      {{note.content}}
+    </p>
+      <a href = "/user/{{user.username}}/{{note.id}}">Update your note here!</a>
+  </li>
+  {% endfor %}
+  </ul>
 
-  <img src="https://media.giphy.com/media/AFZgmywhfOhiw/giphy.gif">
 
-  <p class="lead">Now you can learn our secrets!</p>
+  <p class="lead"></p>
 
 {% endblock %}

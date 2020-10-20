@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgres:///notes_db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
-app.config["SECRET_KEY"] = "abc123"
+app.config["SECRET_KEY"] = "poopybutt420"
 
 connect_db(app)
 db.create_all()
@@ -42,7 +42,7 @@ def register():
         session["user_id"] = user.id
 
         # on successful login, redirect to secret page
-        return redirect("/user/user_id")
+        return redirect("/user/{{user.name}}")
 
     else:
         return render_template("register.html", form=form)
@@ -71,17 +71,17 @@ def login():
     return render_template("login.html", form=form)
 
 
-@app.route("/user/<int:user_id>")
-def secret(user_id):
+@app.route("/user/<username>")
+def user_page(username):
     """Example hidden page for logged-in users only."""
-
+    user = User.query.get_or_404(username)
     if "user_id" not in session:
         flash("You are not permitted here idiot!")
         return redirect("/")
 
     else:
         flash("You made it!  Ezpzlemonsqzy.")
-        return render_template("user.html")
+        return render_template("user.html", user=user)
 
 
 @app.route("/logout")
@@ -91,3 +91,55 @@ def logout():
     session.pop("user_id")
 
     return redirect("/")
+
+@app.route("/user/<username>/delete",methods=["POST"])
+def delete_user():
+    """deletes user from database"""
+    user = User.query.get_or_404(username)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect('/')
+
+@app.route("/user/<username>/notes/add", methods=["POST"])
+def add_note(username):
+    """adds note to user"""
+    form = AddNoteForm()
+    user = User.query.get_or_404(username)
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        owner = user.id
+        note = Note(title, content, owner)
+        db.session.add(note)
+        db.session.commit()
+        # adds a new note
+        return redirect(url_for('user', username=user.username))
+
+    else:
+        return render_template("note_add.html", form=form)
+
+@app.route("/user/<username>/notes/<int:note_id>/update", methods=["GET","POST"])
+def update_note(username, note_id)
+    """updates note for user"""
+    form = AddNoteForm()
+    note = Note.query.get_or_404(note_id)
+    if form.validate_on_submit():
+        note.title = form.title.data
+        note.content = form.content.data
+        db.session.commit()
+        # updates the note
+        return redirect(url_for('user', username=user.username))
+
+    else:
+        return render_template("note_add.html", form=form)
+
+
+@app.route("/user/<username>/notes/<int:note_id>/delete", methods=["POST"])
+def user_note(username,note_id):
+    """deletes note from database"""
+    user = User.query.get_or_404(username)
+    note = Note.query.get_or_404(note_id)
+    db.session.delete(note)
+    db.session.commit()
+    return redirect(url_for('user', username=user.username, note_id=note.id))
+)
