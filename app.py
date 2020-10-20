@@ -19,7 +19,7 @@ toolbar = DebugToolbarExtension(app)
 def homepage():
     """Show homepage with links to site areas."""
 
-    return render_template("index.html")
+    return redirect("/register")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -31,8 +31,11 @@ def register():
     if form.validate_on_submit():
         name = form.username.data
         pwd = form.password.data
+        email = form.email.data
+        first_name = form.first_name.data
+        last_name = form.last_name.data
 
-        user = User.register(name, pwd)
+        user = User.register(name, pwd, email, first_name, last_name)
         db.session.add(user)
         db.session.commit()
 
@@ -73,7 +76,7 @@ def secret():
     """Example hidden page for logged-in users only."""
 
     if "user_id" not in session:
-        flash("You must be logged in to view!")
+        flash("You are not permitted here idiot!")
         return redirect("/")
 
         # alternatively, can return HTTP Unauthorized status:
@@ -82,6 +85,7 @@ def secret():
         # raise Unauthorized()
 
     else:
+        flash("You made it!  Ezpzlemonsqzy.")
         return render_template("secret.html")
 
 
